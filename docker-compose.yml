@@ -1,4 +1,4 @@
-version: "1"
+version: "3"
 services:
   db:
     container_name: challenge_db
@@ -7,9 +7,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGDATA: ${PGDATA}
     volumes:
-       - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     restart: unless-stopped
@@ -17,15 +16,24 @@ services:
     container_name: challenge_api
     build: ./api
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       PORT: ${PORT}
+      NODE_ENV: production
     ports:
       - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: ./api
+          target: /api
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
   ui:
     container_name: challenge_ui
     build: ./ui
     ports:
       - "3001:3001"
 volumes:
-    db:
-      external: true
+  db:
+    external: true
