@@ -1,15 +1,16 @@
+import { error } from "console";
 import express, { Request, Response } from "express";
-import Joi, { Schema } from "joi";
-import { deposit, withdrawal } from "../handlers/transactionHandler";
+import { z } from "zod";
 
 const router = express.Router();
 
-const transactionSchema: Schema = Joi.object({
-  amount: Joi.number().required(),
+const transactionSchema = z.object({
+  amount: z.number(),
+  type: z.string(),
 });
 
 router.put("/:accountID/withdraw", async (request: Request, response: Response) => {
-  const {error} = transactionSchema.validate(request.body);
+  const dto = transactionSchema.parse(request.body);
 
   if (error) {
     return response.status(400).send(error.details[0].message);
